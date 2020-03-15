@@ -1,5 +1,5 @@
 //Author: Mohammad Hossein Hakimi Siboni
-//Affiliation: Center For Cognitive and Data Science, Shahid Beheshti University, Physics Dpt.
+//Center For Complex Networks and Social Data Science, Shahid Beheshti University, Physics Dpt.
 
 #ifndef HYBRIDDYNAMICS_HEADERS_MATRIX_H_
 #define HYBRIDDYNAMICS_HEADERS_MATRIX_H_
