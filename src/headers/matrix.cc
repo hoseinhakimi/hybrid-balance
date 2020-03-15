@@ -4,7 +4,7 @@
 #include <stdlib.h> /* srand, rand */
 #include <time.h>   /* time */
 #include <numeric>  // std::inner_product
-
+#include <iostream>
 #include "matrix.h"
 #include "../mathematics/iter.cc"
 
@@ -13,6 +13,11 @@ Matrix::Matrix(short size, double randomness, double participation)
     this->size = size;
     this->randomness = randomness;
     this->participation = participation;
+    this->count();
+    this->makeMatrix();
+    this->calculateTriadEnergy();
+    this->calculateSquarEnergy();
+    this->calculateTotalEnergy();
 }
 
 void Matrix::count()
@@ -55,23 +60,17 @@ void Matrix::calculateTriadEnergy()
         for (short j = i + 1; j < this->size; j++)
         {
             int *column = this->adjacency[j];
-            eng += std::inner_product(row, row + this->size, column, 0) * this->adjacency[i][j];
+            eng -= std::inner_product(row, row + this->size, column, 0) * this->adjacency[i][j];
         };
     };
-    this->triadEnergy = -eng / (3 * triadCount);
+    this->triadEnergy = float(eng) / (3 * this->triadCount);
 }
 
 void Matrix::calculateSquarEnergy()
 {
     this->squareEnergy = 0;
-    unsigned **sqrs = squares(this->size, 4);
-    unsigned idx[3][3] = {{1, 2, 3}, {1, 3, 2}, {2, 1, 3}};
-    for (short i = 0; i < nChoosek(this->size, 4); i++)
-    {
-        unsigned *row = sqrs[i];
-        this->squareEnergy += oneSquareEnergy(row);
-    };
-    this->squareEnergy /= -squarCount * 3;
+    squares(4, this);
+    this->squareEnergy = -float(this->squareEnergy) / (this->squarCount * 3);
 }
 
 void Matrix::calculateTotalEnergy()
@@ -80,7 +79,7 @@ void Matrix::calculateTotalEnergy()
                         (1 - this->participation) * this->triadEnergy;
 }
 
-short Matrix::oneSquareEnergy(unsigned *row)
+void Matrix::oneSquareEnergy(unsigned *row)
 {
     short sqrEnergy = 0;
     unsigned idx[3][3] = {{1, 2, 3}, {1, 3, 2}, {2, 1, 3}};
@@ -91,5 +90,5 @@ short Matrix::oneSquareEnergy(unsigned *row)
                      this->adjacency[row[idx[i][1]]][row[idx[i][2]]] *
                      this->adjacency[row[idx[i][2]]][row[0]];
     }
-    return sqrEnergy;
+    this->squareEnergy += sqrEnergy;
 }

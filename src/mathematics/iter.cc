@@ -5,6 +5,8 @@
 #include <vector>
 #include <iostream>
 
+#include "../headers/matrix.h"
+
 unsigned nChoosek(unsigned n, unsigned k)
 {
     if (k > n)
@@ -23,35 +25,23 @@ unsigned nChoosek(unsigned n, unsigned k)
     return result;
 }
 
-unsigned **squares(unsigned n, unsigned r)
+void squares(unsigned r, Matrix *mat)
 {
-    unsigned squares_count = nChoosek(n, r);
-
-    unsigned **squares;
-    squares = new unsigned *[squares_count];
-    for (short i = 0; i < squares_count; i++)
-    {
-        squares[i] = new unsigned[4];
-    }
-
-    std::vector<bool> v(n);
+    unsigned oneSquare[4];
+    std::vector<bool> v(mat->size);
     std::fill(v.end() - r, v.end(), true);
-    short row = 0;
     short column;
-
     do
     {
         column = 0;
-        for (unsigned i = 0; i < n; ++i)
+        for (unsigned i = 0; i < mat->size; ++i)
         {
             if (v[i])
             {
-                squares[row][column] = i;
+                oneSquare[column] = i;
                 column++;
             }
         }
-        row++;
+        mat->oneSquareEnergy(oneSquare);
     } while (std::next_permutation(v.begin(), v.end()));
-
-    return squares;
 }

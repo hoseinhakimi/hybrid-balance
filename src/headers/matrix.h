@@ -12,9 +12,9 @@ public:
     double participation;
     int triadCount;
     int squarCount;
-    int triadEnergy;
-    int squareEnergy;
-    int totalEnergy;
+    float triadEnergy;
+    float squareEnergy;
+    float totalEnergy;
     int **adjacency;
 
     Matrix(short size, double randomness, double participation);
@@ -24,7 +24,7 @@ public:
     void calculateTriadEnergy();
     void calculateSquarEnergy();
     void calculateTotalEnergy();
-    short oneSquareEnergy(unsigned *row);
+    void oneSquareEnergy(unsigned *row);
 };
 
 #endif // HYBRIDDYNAMICS_HEADERS_MATRIX_H_
