@@ -8,11 +8,7 @@ using namespace std;
 
 int main()
 {
-    Matrix mat(10, 1, 3);
-    mat.count();
-    mat.makeMatrix();
-    mat.calculateSquarEnergy();
-    mat.calculateTriadEnergy();
-    mat.calculateTotalEnergy();
-    cout << mat.totalEnergy << "\n";
+
+    Matrix mat(50, 0, 0.5);
+    cout << mat.totalEnergy << "\t" << mat.squareEnergy << "\t" << mat.triadEnergy << "\n";
 }
