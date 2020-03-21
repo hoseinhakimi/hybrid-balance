@@ -7,24 +7,35 @@
 class Matrix
 {
 public:
-    short size;
-    double randomness;
-    double participation;
-    int triadCount;
-    int squarCount;
-    float triadEnergy;
-    float squareEnergy;
-    float totalEnergy;
-    int **adjacency;
+  short size;
+  double randomness;
+  double participation;
+  int triadCount;
+  int squarCount;
 
-    Matrix(short size, double randomness, double participation);
-    void count();
-    void makeMatrix();
-    void initializeAdjacency();
-    void calculateTriadEnergy();
-    void calculateSquarEnergy();
-    void calculateTotalEnergy();
-    void oneSquareEnergy(unsigned *row);
+  int signsSum = 0;
+
+  int twoStars;
+  int openSquares;
+  int ssc;
+
+  int triadEnergy;
+  int squareEnergy;
+
+  float totalEnergy;
+  int **adjacency;
+
+  Matrix(short size, double randomness, double participation);
+  void count();
+  void makeMatrix();
+  void resetMatrix();
+  void initializeAdjacency();
+  void calculateTriadEnergy();
+  void calculateSquarEnergy();
+  void calculateTotalEnergy();
+  void openSquaresChange(int *link);
+  void oneSquareEnergy(unsigned *row);
+  int oneSquareEnergyPrime(unsigned *row);
 };
 
 #endif // HYBRIDDYNAMICS_HEADERS_MATRIX_H_
