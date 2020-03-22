@@ -1,22 +1,11 @@
 //Author: Mohammad Hossein Hakimi Siboni
 //Center For Complex Networks and Social Data Science, Shahid Beheshti University, Physics Dpt.
 
-#include "headers/matrix.cc"
-#include "headers/dynamics.cc"
-#include <iostream> // std::cout
-
-using namespace std;
+#include "thread.cc"
 
 int main()
 {
-  Matrix mat(50, 0.5, 0.5);
-  cout << mat.squareEnergy << "\t" << mat.openSquares << "\t"
-       << mat.triadEnergy << "\t" << mat.twoStars << "\t"
-       << mat.signsSum << "\n";
-  dynamics dyn(&mat, 70);
-  dyn.mixedDynamics();
-  cout << mat.squareEnergy << "\t" << mat.openSquares << "\t"
-       << mat.triadEnergy << "\t" << mat.twoStars << "\t"
-       << mat.signsSum << "\n";
-  
+  // auto start = std::chrono::system_clock::now();
+  // std::time_t end_time = std::chrono::system_clock::to_time_t(start);
+  simulate(10, 0.5, 0.05);
 }

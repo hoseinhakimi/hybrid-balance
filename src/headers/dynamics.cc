@@ -6,7 +6,7 @@
 #include <numeric> // std::inner_product
 #include <math.h>  /* exp pow */
 
-dynamics::dynamics(Matrix *mat, float temperature)
+dynamics::dynamics(Matrix *mat, double temperature)
 {
   this->mat = mat;
   this->temperature = temperature;

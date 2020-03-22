@@ -42,6 +42,7 @@ void Matrix::makeMatrix()
 
 void Matrix::initializeAdjacency()
 {
+  this->signsSum = 0;
   srand(time(NULL));
   for (short i = 0; i < this->size; i++)
   {
@@ -59,6 +60,7 @@ void Matrix::calculateTriadEnergy()
 {
   int eng = 0;
   int stars = 0;
+  this->twoStars = 0;
   for (short i = 0; i < this->size; i++)
   {
     int *row = this->adjacency[i];

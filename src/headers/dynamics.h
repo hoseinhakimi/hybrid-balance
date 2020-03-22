@@ -11,7 +11,7 @@ class dynamics
 public:
   Matrix *mat;
   int randomTwins[2];
-  float temperature;
+  double temperature;
 
   int *row;
   int *column;
@@ -21,7 +21,7 @@ public:
   unsigned smaller, bigger;
   unsigned *nodes;
 
-  dynamics(Matrix *, float);
+  dynamics(Matrix *, double);
   void randomTwinsGenerator();
   void mixedDynamics();
   void triadDynamics();
