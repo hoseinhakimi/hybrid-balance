@@ -5,7 +5,9 @@
 
 int main()
 {
-  // auto start = std::chrono::system_clock::now();
-  // std::time_t end_time = std::chrono::system_clock::to_time_t(start);
-  simulate(10, 0.5, 0.05);
+  int size;
+  float participation;
+  cin >> size >> participation;
+  cout << participation / 20 << '\t' << size << '\t';
+  simulate(size, 0.5, participation/20);
 }
