@@ -26,13 +26,11 @@ void *doTheJob(void *args)
   Matrix mat(data->size, data->randomness, data->participation);
   for (int t = data->start_temp; t < data->thread_temperature_step + data->start_temp; t++)
   {
-    // cout << t << "\n";
-    // cout << float(mat.squareEnergy) / (mat.squarCount * 3) << "\t" << float(mat.openSquares) / (mat.squarCount * 12) << "\t"
-    //      << float(mat.triadEnergy) / mat.triadCount << "\t" << mat.twoStars / (mat.triadCount * 3) << "\t"
-    //      << float(mat.signsSum) / ((mat.size * mat.size - mat.size) / 2) << "\n";
     dynamics dyn(&mat, t);
     dyn.mixedDynamics();
-    outfile << t
+    outfile << data->participation
+            << "\t"
+            << t
             << "\t"
             << float(mat.squareEnergy) / (mat.squarCount * 3)
             << "\t"
@@ -66,24 +64,8 @@ void simulate(int size, float randomness, float participation)
 {
   int thread_temp_step = 100 / NUM_THREADS;
   const char *path = "../outputs/data/mixed_dynamics_";
+  outfile.open(path + to_string(size) + '_' + to_string(randomness), ios_base::app);
 
-  outfile.open(path + to_string(size) + '_' + to_string(randomness) + '_' + to_string(participation));
-  // outfile << "Square Energy Participation: " << participation << "\t"
-  //         << "Initial Friendship Ratio: " << randomness << "\t"
-  //         << "Size: " << size << "\n";
-
-  outfile << "Temperature"
-          << "\t"
-          << "SquareEnergy"
-          << "\t"
-          << "OpenSquares"
-          << "\t"
-          << "TriadEnergy"
-          << "\t"
-          << "TwoStars"
-          << "\t"
-          << "Mean"
-          << "\n";
   pthread_t threads[NUM_THREADS];
   struct thread_data td[NUM_THREADS];
   int rc;

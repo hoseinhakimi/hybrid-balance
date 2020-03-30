@@ -6,8 +6,30 @@
 int main()
 {
   int size;
-  float participation;
+  float participation, randomness;
+  randomness = 0.5;
   cin >> size >> participation;
-  cout << participation / 20 << '\t' << size << '\t';
-  simulate(size, 0.5, participation/20);
+  cout << participation / 20 << '\t' << size << '\n';
+  
+  const char *path = "../outputs/data/mixed_dynamics_";
+  if (!(ifstream(path + to_string(size) + '_' + to_string(randomness))))
+  {
+    ofstream outfile;
+    outfile.open(path + to_string(size) + '_' + to_string(randomness));
+    outfile << "Participation"
+            << "\t"
+            << "Temperature"
+            << "\t"
+            << "SquareEnergy"
+            << "\t"
+            << "OpenSquares"
+            << "\t"
+            << "TriadEnergy"
+            << "\t"
+            << "TwoStars"
+            << "\t"
+            << "Mean"
+            << "\n";
+  }
+  simulate(size, 0.5, participation / 20);
 }
