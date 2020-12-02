@@ -1,3 +1,4 @@
-outputs/
+/outputs/*
+
 src/main
 src/a.out
