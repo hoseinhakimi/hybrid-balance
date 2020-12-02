@@ -1,4 +1,5 @@
 /outputs/*
-
+/.vs/*
+/.vscode/*
 src/main
 src/a.out
