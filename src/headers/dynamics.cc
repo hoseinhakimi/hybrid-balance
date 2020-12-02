@@ -11,82 +11,87 @@ dynamics::dynamics(Matrix *mat, double temperature)
   this->mat = mat;
   this->temperature = temperature;
   this->nodes = new unsigned[mat->size];
+  this->dum_1 = this->dum_2 = this->dum_3 = this->delta_o = this->extraTerms = 0;
 }
 void dynamics::mixedDynamics()
 {
   float eng;
-  int montCarloSteps = pow(mat->size, 4);
+  int montCarloSteps = pow(mat->size, 3) * 10;
   for (int i = 0; i < montCarloSteps; i++)
   {
     this->randomTwinsGenerator();
 
     this->oneSquareLink();
     this->oneTraidLink();
-    eng = (1 - mat->participation) * this->tEng + mat->participation * this->sEng; //!!!!????
-
+    eng = mat->theta * this->tEng + mat->alpha * this->sEng;
     /*
-    Energy Change on Flip (dE) = - eng - eng = -2eng, 
-    Boltzman Factor = exp(-dE/T) = exp(2eng/T) 
+    Boltzman Factor = exp(-dE/T)
     */
 
-    if (float(rand()) / RAND_MAX < exp(2 * eng / this->temperature))
+    if (float(rand()) / RAND_MAX < exp(- eng / this->temperature))
     {
       mat->adjacency[this->randomTwins[0]][this->randomTwins[1]] *= -1;
       mat->adjacency[this->randomTwins[1]][this->randomTwins[0]] *= -1;
-      mat->triadEnergy -= 2 * this->tEng;
-      mat->squareEnergy -= 2 * this->sEng;
+      mat->triadEnergy += this->tEng;
+      mat->squareEnergy += this->sEng;
       mat->twoStars += this->tsc;
-      mat->openSquares += mat->ssc;
+      mat->openSquares += this->delta_o;
       mat->signsSum += 2 * mat->adjacency[this->randomTwins[0]][this->randomTwins[1]];
     }
   }
 }
 void dynamics::triadDynamics()
 {
-  int montCarloSteps = pow(mat->size, 3);
+  int montCarloSteps = pow(mat->size, 4);
   for (int i = 0; i < montCarloSteps; i++)
   {
     this->randomTwinsGenerator();
     this->oneTraidLink();
     /*
-    Energy Change on Flip (dE) = - eng - eng = -2eng, 
-    Boltzman Factor = exp(-dE/T) = exp(2eng/T) 
+    Boltzman Factor = exp(-dE/T)
     */
-    if (float(rand()) / RAND_MAX < exp(2 * this->tEng / this->temperature))
+
+    if (float(rand()) / RAND_MAX < exp(- this->tEng / this->temperature))
     {
+      // std::cout << exp(2 * this->tEng / this->temperature);
       mat->adjacency[this->randomTwins[0]][this->randomTwins[1]] *= -1;
       mat->adjacency[this->randomTwins[1]][this->randomTwins[0]] *= -1;
-      mat->triadEnergy -= 2 * this->tEng / mat->triadCount;
+      mat->triadEnergy += this->tEng;
       mat->twoStars += this->tsc;
+      mat->signsSum += 2 * mat->adjacency[this->randomTwins[0]][this->randomTwins[1]];
     }
   }
 }
 
 void dynamics::oneTraidLink()
 {
+  int dummy;
   this->row = mat->adjacency[this->randomTwins[0]];
   this->column = mat->adjacency[this->randomTwins[1]];
   short linkSign = this->row[this->randomTwins[1]];
   int sum = std::accumulate(this->row, this->row + mat->size, 0) +
             std::accumulate(this->column, this->column + mat->size, 0);
-  this->tEng = -std::inner_product(this->row, this->row + mat->size, this->column, 0) * linkSign;
+  this->tEng = std::inner_product(this->row, this->row + mat->size, this->column, 0) * linkSign * 2;
   this->tsc = -2 * linkSign * (sum - 2 * linkSign);
+  // std::cout << this->tEng << "\n";
+  // std::cin >> dummy;
 }
 
 void dynamics::squarDynamics()
 {
-  int montCarloSteps = pow(mat->size, 4) * 3;
+  int montCarloSteps = pow(mat->size, 3);
 
   for (int i = 0; i < montCarloSteps; i++)
   {
     this->randomTwinsGenerator();
     this->oneSquareLink();
-    if (float(rand()) / RAND_MAX < exp(2 * this->sEng / this->temperature))
+    if (float(rand()) / RAND_MAX < exp(- this->sEng / this->temperature))
     {
       mat->adjacency[this->randomTwins[0]][this->randomTwins[1]] *= -1;
       mat->adjacency[this->randomTwins[1]][this->randomTwins[0]] *= -1;
-      mat->squareEnergy -= 2 * this->sEng / (3 * mat->squarCount);
-      mat->openSquares += mat->ssc;
+      mat->squareEnergy += this->sEng;
+      mat->openSquares += this->delta_o;
+      mat->signsSum += 2 * mat->adjacency[this->randomTwins[0]][this->randomTwins[1]];
     }
   }
 }
@@ -95,40 +100,31 @@ void dynamics::oneSquareLink()
 {
   this->sEng = 0;
   mat->ssc = 0;
-  if (this->randomTwins[0] > this->randomTwins[1])
+  this->dum_1 = this->dum_2 = this->dum_3 = this->delta_o = this->extraTerms = 0;
+  short linkSign = mat->adjacency[this->oneSquare[0]][this->oneSquare[1]];
+  for (int c = 0; c < mat->size; c++)
   {
-    this->bigger = this->randomTwins[0];
-    this->smaller = this->randomTwins[1];
-  }
-  else
-  {
-    this->bigger = this->randomTwins[1];
-    this->smaller = this->randomTwins[0];
-  }
-
-  this->oneSquare[0] = smaller;
-  this->oneSquare[1] = bigger;
-
-  short counter = 0;
-  for (counter = 0; counter < smaller; counter++)
-    this->nodes[counter] = counter;
-  for (counter = smaller + 1; counter < bigger; counter++)
-    this->nodes[counter - 1] = counter;
-  for (counter = bigger + 1; counter < mat->size; counter++)
-    this->nodes[counter - 2] = counter;
-
-  for (int c = 0; c < mat->size - 2; c++)
-  {
-    this->oneSquare[2] = this->nodes[c];
-    for (int j = c + 1; j < mat->size - 2; j++)
+    this->dum_1 += mat->adjacency[this->oneSquare[0]][c];
+    this->dum_2 += mat->adjacency[this->oneSquare[1]][c];
+    this->dum_3 += mat->adjacency[this->oneSquare[0]][c] *
+                   mat->adjacency[this->oneSquare[1]][c];
+    this->oneSquare[2] = c;
+    for (int j = 0; j < c; j++)
     {
-      this->oneSquare[3] = this->nodes[j];
+      this->oneSquare[3] = j;
       this->sEng += mat->oneSquareEnergyPrime(oneSquare);
     }
   }
+  this->extraTerms = (this->dum_1 + this->dum_2) * 2 * linkSign +
+                     2 * dum_3 + 2 * (mat->size - 1) - 3;
+  this->sEng = 2 * linkSign * (this->sEng + (3 - 2 * mat->size) * linkSign);
+  // std::cout << this->sEng << "\n";
+  this->delta_o = -2 * linkSign * (mat->ssc - this->extraTerms);
 }
 void dynamics::randomTwinsGenerator()
 {
   this->randomTwins[0] = rand() % this->mat->size;
   this->randomTwins[1] = (this->randomTwins[0] + (rand() % (this->mat->size - 1)) + 1) % this->mat->size;
+  this->oneSquare[0] = this->randomTwins[0];
+  this->oneSquare[1] = this->randomTwins[1];
 }

@@ -10,6 +10,8 @@ public:
   short size;
   double randomness;
   double participation;
+  double alpha;
+  double theta;
   int triadCount;
   int squarCount;
 
@@ -25,7 +27,7 @@ public:
   float totalEnergy;
   int **adjacency;
 
-  Matrix(short size, double randomness, double participation);
+  Matrix(short size, double randomness, double alpha, double theta);
   void count();
   void makeMatrix();
   void resetMatrix();

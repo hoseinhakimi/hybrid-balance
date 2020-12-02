@@ -7,11 +7,12 @@
 #include "matrix.h"
 #include "../mathematics/iter.cc"
 
-Matrix::Matrix(short size, double randomness, double participation)
+Matrix::Matrix(short size, double randomness, double alpha, double theta)
 {
   this->size = size;
   this->randomness = randomness;
-  this->participation = participation;
+  this->alpha = alpha;
+  this->theta = theta;
   this->count();
   this->makeMatrix();
   this->resetMatrix();
@@ -84,8 +85,8 @@ void Matrix::calculateSquarEnergy()
 
 void Matrix::calculateTotalEnergy()
 {
-  this->totalEnergy = this->participation * float(this->squareEnergy) / (this->squarCount * 3) +
-                      (1 - this->participation) * float(this->triadEnergy) / (this->triadCount * 3);
+  this->totalEnergy = this->alpha * float(this->squareEnergy) / (this->squarCount * 3) +
+                      this->theta * float(this->triadEnergy) / (this->triadCount * 3);
 }
 
 void Matrix::oneSquareEnergy(unsigned *row)
@@ -124,7 +125,7 @@ int Matrix::oneSquareEnergyPrime(unsigned *row)
   short linkSign = this->adjacency[row[0]][row[1]];
   for (unsigned i = 0; i < 2; i++)
   {
-    sqrEnergy -=
+    sqrEnergy +=
         this->adjacency[row[idx[i][0]]][row[idx[i][1]]] *
         this->adjacency[row[idx[i][1]]][row[idx[i][2]]] *
         this->adjacency[row[idx[i][2]]][row[0]];
@@ -136,8 +137,8 @@ int Matrix::oneSquareEnergyPrime(unsigned *row)
         this->adjacency[row[idx[i][1]]][row[idx[i][2]]] *
             this->adjacency[row[idx[i][2]]][row[0]];
   }
-  this->ssc -= 2 * openSquare * linkSign;
-  return sqrEnergy * linkSign;
+  this->ssc += openSquare;
+  return sqrEnergy;
 }
 
 void Matrix::openSquaresChange(int *link)

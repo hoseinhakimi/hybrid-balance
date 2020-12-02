@@ -16,33 +16,38 @@ ofstream outfile;
 struct thread_data
 {
   int thread_id, size;
-  double thread_temperature_step, start_temp;
-  float randomness, participation;
+  float theta_step, start_theta;
+  float randomness, alpha;
 };
 void *doTheJob(void *args)
 {
+  const char *path = "../outputs/data/r_";
   struct thread_data *data;
   data = (struct thread_data *)args;
-  Matrix mat(data->size, data->randomness, data->participation);
-  for (int t = data->start_temp; t < data->thread_temperature_step + data->start_temp; t++)
+  ofstream outfile;
+  outfile.open(path + to_string(data->size) + '_' +to_string(data->thread_id) + ".csv", ios_base::app);
+  for (int t = data->start_theta; t < data->theta_step + data->start_theta; t++)
   {
-    dynamics dyn(&mat, t);
+    Matrix mat(data->size, data->randomness, data->alpha, float(t) / 1000);
+    mat.calculateTotalEnergy();
+    dynamics dyn(&mat, 1);
     dyn.mixedDynamics();
-    outfile << data->participation
-            << "\t"
-            << t
-            << "\t"
+    outfile << data->alpha
+            << ","
+            << float(t) / 1000
+            << ","
+            << mat.totalEnergy
+            << ","
             << float(mat.squareEnergy) / (mat.squarCount * 3)
-            << "\t"
+            << ","
             << float(mat.openSquares) / (mat.squarCount * 12)
-            << "\t"
+            << ","
             << float(mat.triadEnergy) / mat.triadCount
-            << "\t"
-            << mat.twoStars / (mat.triadCount * 3)
-            << "\t"
+            << ","
+            << float(mat.twoStars) / (mat.triadCount * 3)
+            << ","
             << float(mat.signsSum) / ((mat.size * mat.size - mat.size) / 2)
             << "\n";
-    mat.resetMatrix();
   }
 
   pthread_exit(NULL);
@@ -60,12 +65,9 @@ std::string datetime()
   return string(buffer);
 }
 
-void simulate(int size, float randomness, float participation)
+void simulate(int size, float randomness, float alpha)
 {
-  int thread_temp_step = 100 / NUM_THREADS;
-  const char *path = "../outputs/data/mixed_dynamics_";
-  outfile.open(path + to_string(size) + '_' + to_string(randomness), ios_base::app);
-
+  int thread_temp_step = 500 / NUM_THREADS;
   pthread_t threads[NUM_THREADS];
   struct thread_data td[NUM_THREADS];
   int rc;
@@ -73,9 +75,9 @@ void simulate(int size, float randomness, float participation)
   for (i = 0; i < NUM_THREADS; i++)
   {
     td[i].thread_id = i;
-    td[i].thread_temperature_step = thread_temp_step;
-    td[i].start_temp = thread_temp_step * i;
-    td[i].participation = participation;
+    td[i].theta_step = thread_temp_step;
+    td[i].start_theta = thread_temp_step * i;
+    td[i].alpha = alpha;
     td[i].randomness = randomness;
     td[i].size = size;
     rc = pthread_create(&threads[i], NULL, doTheJob, (void *)&td[i]);

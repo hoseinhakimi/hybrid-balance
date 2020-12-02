@@ -80,7 +80,12 @@
       "forward_list": "cpp",
       "regex": "cpp",
       "scoped_allocator": "cpp",
-      "shared_mutex": "cpp"
+      "shared_mutex": "cpp",
+      "hash_map": "cpp",
+      "compare": "cpp",
+      "concepts": "cpp",
+      "ranges": "cpp",
+      "stop_token": "cpp"
     }
 	}
 }
