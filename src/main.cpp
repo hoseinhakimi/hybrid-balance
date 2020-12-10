@@ -6,12 +6,12 @@
 
 int main()
 {
-  int size;
-  float alpha, randomness;
-  cin >> size >> alpha >> randomness;
+  int size, ensemblesCount;
+  float alpha, theta, randomness;
+  cin >> size >> alpha >> theta >> randomness >> ensemblesCount;
   alpha /= 1000;
 
-  cout << alpha << '\t' << size << '\t' << randomness << '\n';
+  cout << alpha << '\t'<< theta <<'\t' <<size << '\t' << randomness << '\n';
 
-  simulate(size, randomness, alpha);
+  simulate(size, randomness, alpha, theta, ensemblesCount);
 }

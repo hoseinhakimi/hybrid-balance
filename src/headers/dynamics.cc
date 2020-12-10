@@ -20,7 +20,6 @@ void dynamics::mixedDynamics()
   for (int i = 0; i < montCarloSteps; i++)
   {
     this->randomTwinsGenerator();
-
     this->oneSquareLink();
     this->oneTraidLink();
     eng = mat->theta * this->tEng + mat->alpha * this->sEng;
@@ -29,6 +28,7 @@ void dynamics::mixedDynamics()
     */
 
     if (float(rand()) / RAND_MAX < exp(- eng / this->temperature))
+    // if (eng<0)
     {
       mat->adjacency[this->randomTwins[0]][this->randomTwins[1]] *= -1;
       mat->adjacency[this->randomTwins[1]][this->randomTwins[0]] *= -1;

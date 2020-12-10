@@ -15,41 +15,76 @@ using namespace std;
 ofstream outfile;
 struct thread_data
 {
-  int thread_id, size;
-  float theta_step, start_theta;
+  int thread_id, size, ensemblesCount;
+  float step, start_theta;
   float randomness, alpha;
 };
+void *doTheJobFixedTheta(void *args)
+{
+  const char *path = "../outputs/data/r_";
+  struct thread_data *data;
+  data = (struct thread_data *)args;
+  ofstream outfile;
+  outfile.open(path + to_string(data->size) + '_' + to_string(data->thread_id) + ".csv", ios_base::app);
+  for (int ensemble; ensemble < data->ensemblesCount; ensemble++)
+  {
+      Matrix mat(data->size, data->randomness, data->alpha, data->start_theta);
+      mat.calculateTotalEnergy();
+      dynamics dyn(&mat, 1);
+      dyn.mixedDynamics();
+      outfile << data->alpha
+              << ","
+              << data->start_theta
+              << ","
+              << mat.totalEnergy
+              << ","
+              << float(mat.squareEnergy) / (mat.squarCount * 3)
+              << ","
+              << float(mat.openSquares) / (mat.squarCount * 12)
+              << ","
+              << float(mat.triadEnergy) / mat.triadCount
+              << ","
+              << float(mat.twoStars) / (mat.triadCount * 3)
+              << ","
+              << float(mat.signsSum) / ((mat.size * mat.size - mat.size) / 2)
+              << "\n";
+  }
+  pthread_exit(NULL);
+}
+
 void *doTheJob(void *args)
 {
   const char *path = "../outputs/data/r_";
   struct thread_data *data;
   data = (struct thread_data *)args;
   ofstream outfile;
-  outfile.open(path + to_string(data->size) + '_' +to_string(data->thread_id) + ".csv", ios_base::app);
-  for (int t = data->start_theta; t < data->theta_step + data->start_theta; t++)
+  outfile.open(path + to_string(data->size) + '_' + to_string(data->thread_id) + ".csv", ios_base::app);
+  for (int t = data->start_theta; t < data->step + data->start_theta; t++)
   {
-    Matrix mat(data->size, data->randomness, data->alpha, float(t) / 1000);
-    mat.calculateTotalEnergy();
-    dynamics dyn(&mat, 1);
-    dyn.mixedDynamics();
-    outfile << data->alpha
-            << ","
-            << float(t) / 1000
-            << ","
-            << mat.totalEnergy
-            << ","
-            << float(mat.squareEnergy) / (mat.squarCount * 3)
-            << ","
-            << float(mat.openSquares) / (mat.squarCount * 12)
-            << ","
-            << float(mat.triadEnergy) / mat.triadCount
-            << ","
-            << float(mat.twoStars) / (mat.triadCount * 3)
-            << ","
-            << float(mat.signsSum) / ((mat.size * mat.size - mat.size) / 2)
-            << "\n";
+    for (int ensemble; ensemble < data->ensemblesCount; ensemble++)
+    {
+      Matrix mat(data->size, data->randomness, data->alpha, float(t) / 100);
+      mat.calculateTotalEnergy();
+      dynamics dyn(&mat, 1);
+      dyn.mixedDynamics();
+      outfile << data->alpha
+              << ","
+              << float(t) / 100
+              << ","
+              << mat.totalEnergy
+              << ","
+              << float(mat.squareEnergy) / (mat.squarCount * 3)
+              << ","
+              << float(mat.openSquares) / (mat.squarCount * 12)
+              << ","
+              << float(mat.triadEnergy) / mat.triadCount
+              << ","
+              << float(mat.twoStars) / (mat.triadCount * 3)
+              << ","
+              << float(mat.signsSum) / ((mat.size * mat.size - mat.size) / 2)
+              << "\n";
+    }
   }
-
   pthread_exit(NULL);
 }
 std::string datetime()
@@ -65,29 +100,55 @@ std::string datetime()
   return string(buffer);
 }
 
-void simulate(int size, float randomness, float alpha)
+void simulate(int size, float randomness, float alpha, float theta, int ensemblesCount)
 {
-  int thread_temp_step = 500 / NUM_THREADS;
   pthread_t threads[NUM_THREADS];
   struct thread_data td[NUM_THREADS];
   int rc;
   int i;
-  for (i = 0; i < NUM_THREADS; i++)
+  if (theta < 0)
   {
-    td[i].thread_id = i;
-    td[i].theta_step = thread_temp_step;
-    td[i].start_theta = thread_temp_step * i;
-    td[i].alpha = alpha;
-    td[i].randomness = randomness;
-    td[i].size = size;
-    rc = pthread_create(&threads[i], NULL, doTheJob, (void *)&td[i]);
-
-    if (rc)
+    int thread_temp_step = 50 / NUM_THREADS;
+    for (i = 0; i < NUM_THREADS; i++)
     {
-      cout << "Error:unable to create thread," << rc << endl;
-      exit(-1);
+      td[i].thread_id = i;
+      td[i].ensemblesCount = ensemblesCount;
+      td[i].step = thread_temp_step;
+      td[i].start_theta = thread_temp_step * i;
+      td[i].alpha = alpha;
+      td[i].randomness = randomness;
+      td[i].size = size;
+      rc = pthread_create(&threads[i], NULL, doTheJob, (void *)&td[i]);
+
+      if (rc)
+      {
+        cout << "Error:unable to create thread," << rc << endl;
+        exit(-1);
+      }
+      // cout << pthread_join(threads[i], NULL) << "\n";
     }
-    // cout << pthread_join(threads[i], NULL) << "\n";
+    pthread_exit(NULL);
   }
-  pthread_exit(NULL);
+  else
+  {
+    int ensembles = ensemblesCount / NUM_THREADS;
+    for (i = 0; i < NUM_THREADS; i++)
+    {
+      td[i].thread_id = i;
+      td[i].ensemblesCount = ensembles;
+      td[i].start_theta = theta;
+      td[i].alpha = alpha;
+      td[i].randomness = randomness;
+      td[i].size = size;
+      rc = pthread_create(&threads[i], NULL, doTheJobFixedTheta, (void *)&td[i]);
+
+      if (rc)
+      {
+        cout << "Error:unable to create thread," << rc << endl;
+        exit(-1);
+      }
+      // cout << pthread_join(threads[i], NULL) << "\n";
+    }
+    pthread_exit(NULL);
+  }
 }
