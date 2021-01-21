@@ -17,7 +17,7 @@ struct thread_data
 {
   int thread_id, size, ensemblesCount;
   float step, start_theta;
-  float randomness, alpha;
+  float randomness, alpha, temperature;
 };
 void *doTheJobFixedTheta(void *args)
 {
@@ -28,26 +28,26 @@ void *doTheJobFixedTheta(void *args)
   outfile.open(path + to_string(data->size) + '_' + to_string(data->thread_id) + ".csv", ios_base::app);
   for (int ensemble; ensemble < data->ensemblesCount; ensemble++)
   {
-      Matrix mat(data->size, data->randomness, data->alpha, data->start_theta);
-      mat.calculateTotalEnergy();
-      dynamics dyn(&mat, 1);
-      dyn.mixedDynamics();
-      outfile << data->alpha
-              << ","
-              << data->start_theta
-              << ","
-              << mat.totalEnergy
-              << ","
-              << float(mat.squareEnergy) / (mat.squarCount * 3)
-              << ","
-              << float(mat.openSquares) / (mat.squarCount * 12)
-              << ","
-              << float(mat.triadEnergy) / mat.triadCount
-              << ","
-              << float(mat.twoStars) / (mat.triadCount * 3)
-              << ","
-              << float(mat.signsSum) / ((mat.size * mat.size - mat.size) / 2)
-              << "\n";
+    Matrix mat(data->size, data->randomness, data->alpha, data->start_theta);
+    mat.calculateTotalEnergy();
+    dynamics dyn(&mat, data->temperature);
+    dyn.mixedDynamics();
+    outfile << data->start_theta
+            << ","
+            << data->temperature
+            << ","
+            << mat.totalEnergy
+            << ","
+            << float(mat.squareEnergy) / (mat.squarCount * 3)
+            << ","
+            << float(mat.openSquares) / (mat.squarCount * 12)
+            << ","
+            << float(mat.triadEnergy) / mat.triadCount
+            << ","
+            << float(mat.twoStars) / (mat.triadCount * 3)
+            << ","
+            << float(mat.signsSum) / ((mat.size * mat.size - mat.size) / 2)
+            << "\n";
   }
   pthread_exit(NULL);
 }
@@ -63,7 +63,7 @@ void *doTheJob(void *args)
   {
     for (int ensemble; ensemble < data->ensemblesCount; ensemble++)
     {
-      Matrix mat(data->size, data->randomness, data->alpha, float(t) / 100);
+      Matrix mat(data->size, data->randomness, data->alpha, float(t) / 100, 0.5);
       mat.calculateTotalEnergy();
       dynamics dyn(&mat, 1);
       dyn.mixedDynamics();
@@ -100,7 +100,12 @@ std::string datetime()
   return string(buffer);
 }
 
-void simulate(int size, float randomness, float alpha, float theta, int ensemblesCount)
+void simulate(int size,
+              float randomness,
+              float alpha,
+              float theta,
+              float temperature,
+              int ensemblesCount)
 {
   pthread_t threads[NUM_THREADS];
   struct thread_data td[NUM_THREADS];
@@ -118,7 +123,10 @@ void simulate(int size, float randomness, float alpha, float theta, int ensemble
       td[i].alpha = alpha;
       td[i].randomness = randomness;
       td[i].size = size;
-      rc = pthread_create(&threads[i], NULL, doTheJob, (void *)&td[i]);
+      rc = pthread_create(&threads[i],
+                          NULL,
+                          doTheJob,
+                          (void *)&td[i]);
 
       if (rc)
       {
@@ -138,9 +146,13 @@ void simulate(int size, float randomness, float alpha, float theta, int ensemble
       td[i].ensemblesCount = ensembles;
       td[i].start_theta = theta;
       td[i].alpha = alpha;
+      td[i].temperature = temperature;
       td[i].randomness = randomness;
       td[i].size = size;
-      rc = pthread_create(&threads[i], NULL, doTheJobFixedTheta, (void *)&td[i]);
+      rc = pthread_create(&threads[i],
+                          NULL,
+                          doTheJobFixedTheta,
+                          (void *)&td[i]);
 
       if (rc)
       {

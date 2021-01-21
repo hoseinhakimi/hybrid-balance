@@ -4,7 +4,7 @@ echo "What is the size of the network you want to simulate?"
 read SIZE
 echo "What is randomness?"
 read RAND
-echo "What is theta?"
+echo "What is g?"
 read THETA
 echo "How many Ensembles?"
 read ENS

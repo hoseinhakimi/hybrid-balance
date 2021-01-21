@@ -12,6 +12,7 @@ public:
   double participation;
   double alpha;
   double theta;
+  double erdosProbability;
   int triadCount;
   int squarCount;
 
@@ -27,10 +28,11 @@ public:
   float totalEnergy;
   int **adjacency;
 
-  Matrix(short size, double randomness, double alpha, double theta);
+  Matrix(short size, double randomness, double alpha, double theta, double erdosProbability);
   void count();
   void makeMatrix();
   void resetMatrix();
+  void erdosAdjacency();
   void initializeAdjacency();
   void calculateTriadEnergy();
   void calculateSquarEnergy();

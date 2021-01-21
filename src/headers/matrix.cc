@@ -7,12 +7,13 @@
 #include "matrix.h"
 #include "../mathematics/iter.cc"
 
-Matrix::Matrix(short size, double randomness, double alpha, double theta)
+Matrix::Matrix(short size, double randomness, double alpha, double theta, double erdosProbability = 1)
 {
   this->size = size;
   this->randomness = randomness;
   this->alpha = alpha;
   this->theta = theta;
+  this->erdosProbability = erdosProbability;
   this->count();
   this->makeMatrix();
   this->resetMatrix();
@@ -20,7 +21,7 @@ Matrix::Matrix(short size, double randomness, double alpha, double theta)
 
 void Matrix::resetMatrix()
 {
-  this->initializeAdjacency();
+  this->erdosProbability == 1 ? this->initializeAdjacency() : this->erdosAdjacency();
   this->calculateTriadEnergy();
   this->calculateSquarEnergy();
 }
@@ -38,6 +39,25 @@ void Matrix::makeMatrix()
   {
     this->adjacency[i] = new int[this->size];
     this->adjacency[i][i] = 0;
+  }
+}
+
+void Matrix::erdosAdjacency()
+{
+  this->signsSum = 0;
+  srand(time(NULL));
+  for (short i = 0; i < this->size; i++)
+  {
+    for (short j = i + 1; j < this->size; j++)
+    {
+      if (rand() / RAND_MAX > this->erdosProbability)
+      {
+        short sign = int(float(rand()) / RAND_MAX + this->randomness) * 2 - 1;
+        this->adjacency[i][j] = sign;
+        this->adjacency[j][i] = sign;
+        this->signsSum += sign;
+      }
+    }
   }
 }
 
