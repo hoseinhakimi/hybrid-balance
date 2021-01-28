@@ -7,11 +7,11 @@
 int main()
 {
   int size, ensemblesCount;
-  float temperature, theta, randomness;
-  cin >> size >> temperature >> theta >> randomness >> ensemblesCount;
+  float temperature, alpha, randomness;
+  cin >> size >> temperature >> alpha >> randomness >> ensemblesCount;
   // alpha /= 1000;
 
-  cout << temperature << '\t' << theta << '\t' << size << '\t' << randomness << '\n';
+  cout << temperature << '\t' << alpha << '\t' << size << '\t' << randomness << '\n';
 
-  simulate(size, randomness, 1, theta, temperature, ensemblesCount);
+  simulate(size, randomness, alpha, 1, temperature, ensemblesCount);
 }

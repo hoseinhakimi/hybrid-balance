@@ -26,7 +26,7 @@ void *doTheJobFixedTheta(void *args)
   data = (struct thread_data *)args;
   ofstream outfile;
   outfile.open(path + to_string(data->size) + '_' + to_string(data->thread_id) + ".csv", ios_base::app);
-  for (int ensemble; ensemble < data->ensemblesCount; ensemble++)
+  for (int ensemble=0; ensemble < data->ensemblesCount; ensemble++)
   {
     Matrix mat(data->size, data->randomness, data->alpha, data->start_theta);
     mat.calculateTotalEnergy();

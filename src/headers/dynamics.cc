@@ -16,7 +16,7 @@ dynamics::dynamics(Matrix *mat, double temperature)
 void dynamics::mixedDynamics()
 {
   float eng;
-  int montCarloSteps = pow(mat->size, 3) * 10;
+  int montCarloSteps = pow(mat->size, 3);
   for (int i = 0; i < montCarloSteps; i++)
   {
     this->randomTwinsGenerator();
