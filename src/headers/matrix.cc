@@ -3,7 +3,7 @@
 
 #include <stdlib.h> /* srand, rand */
 #include <time.h>   /* time */
-#include <numeric>  // std::inner_product
+#include <numeric>  /* std::inner_product */
 #include "matrix.h"
 #include "../mathematics/iter.cc"
 

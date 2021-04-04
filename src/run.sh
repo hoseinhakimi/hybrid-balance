@@ -1,27 +1,33 @@
 # #!/bin/sh
-STEPS=20
-echo "What is the size of the network you want to simulate?"
+echo "Temperature Steps Count:"
+read STEPS
+echo "Temperature Steps Value:"
+read TEMPSTEPS
+echo "Network Size:"
 read SIZE
-echo "What is randomness?"
-read RAND
-echo "What is g?"
-read THETA
-echo "How many Ensembles?"
+echo "G:"
+read G
+echo "Ensembles:"
 read ENS
+
 g++ -o main main.cpp -lpthread
-for i in $(seq 0 $STEPS); do
+for r in $(seq 0 2); do
+for temp in $(seq 0 $STEPS); do
   ./main << EOF
   $SIZE
-  $i
-  $THETA
-  $RAND
+  $temp
+  $TEMPSTEPS
+  $G
+  $r
   $ENS
 EOF
 done
 cd ../outputs/data
-filename=$SIZE"_"$RAND"_"$THETA"_3".csv
+filename=$SIZE"_"$G.csv
 cat headers.csv "r_"$SIZE"_0".csv "r_"$SIZE"_1".csv "r_"$SIZE"_2".csv "r_"$SIZE"_3".csv > $filename
-rm "r_"$SIZE"_0".csv "r_"$SIZE"_1".csv "r_"$SIZE"_2".csv "r_"$SIZE"_3".csv
+cd ../../src
+done
+# rm "r_"$SIZE"_0".csv "r_"$SIZE"_1".csv "r_"$SIZE"_2".csv "r_"$SIZE"_3".csv
 
 # cat headers.csv > $filename
 # for i in $(seq 0 3); do

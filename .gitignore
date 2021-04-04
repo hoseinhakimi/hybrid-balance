@@ -1,6 +1,7 @@
 /outputs/*
 /.vs/*
 /.vscode/*
+/python_src/*
 src/main
 src/a.out
 outputs.zip

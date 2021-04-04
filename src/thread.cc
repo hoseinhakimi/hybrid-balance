@@ -16,8 +16,7 @@ ofstream outfile;
 struct thread_data
 {
   int thread_id, size, ensemblesCount;
-  float step, start_theta;
-  float randomness, alpha, temperature;
+  float randomness, alpha, theta, temperature;
 };
 void *doTheJobFixedTheta(void *args)
 {
@@ -26,52 +25,21 @@ void *doTheJobFixedTheta(void *args)
   data = (struct thread_data *)args;
   ofstream outfile;
   outfile.open(path + to_string(data->size) + '_' + to_string(data->thread_id) + ".csv", ios_base::app);
-  for (int ensemble=0; ensemble < data->ensemblesCount; ensemble++)
+  // for (int ensemble = 0; ensemble < data->ensemblesCount; ensemble++)
+  // {
+  Matrix mat(data->size, data->randomness, data->alpha, data->theta);
+  mat.calculateTotalEnergy();
+  dynamics dyn(&mat, data->temperature);
+  dyn.mixedDynamics();
+  for (int e = 0; e < data->ensemblesCount * 1000 + 1; e++)
   {
-    Matrix mat(data->size, data->randomness, data->alpha, data->start_theta);
-    mat.calculateTotalEnergy();
-    dynamics dyn(&mat, data->temperature);
-    dyn.mixedDynamics();
-    outfile << data->start_theta
-            << ","
-            << data->temperature
-            << ","
-            << mat.totalEnergy
-            << ","
-            << float(mat.squareEnergy) / (mat.squarCount * 3)
-            << ","
-            << float(mat.openSquares) / (mat.squarCount * 12)
-            << ","
-            << float(mat.triadEnergy) / mat.triadCount
-            << ","
-            << float(mat.twoStars) / (mat.triadCount * 3)
-            << ","
-            << float(mat.signsSum) / ((mat.size * mat.size - mat.size) / 2)
-            << "\n";
-  }
-  pthread_exit(NULL);
-}
-
-void *doTheJob(void *args)
-{
-  const char *path = "../outputs/data/r_";
-  struct thread_data *data;
-  data = (struct thread_data *)args;
-  ofstream outfile;
-  outfile.open(path + to_string(data->size) + '_' + to_string(data->thread_id) + ".csv", ios_base::app);
-  for (int t = data->start_theta; t < data->step + data->start_theta; t++)
-  {
-    for (int ensemble; ensemble < data->ensemblesCount; ensemble++)
-    {
-      Matrix mat(data->size, data->randomness, data->alpha, float(t) / 100, 0.5);
-      mat.calculateTotalEnergy();
-      dynamics dyn(&mat, 1);
-      dyn.mixedDynamics();
-      outfile << data->alpha
+    dyn.mixedMonteCarloStep();
+    if (e % 1000 == 0)
+      outfile << data->temperature
               << ","
-              << float(t) / 100
+              << data->alpha
               << ","
-              << mat.totalEnergy
+              << data->randomness
               << ","
               << float(mat.squareEnergy) / (mat.squarCount * 3)
               << ","
@@ -82,22 +50,12 @@ void *doTheJob(void *args)
               << float(mat.twoStars) / (mat.triadCount * 3)
               << ","
               << float(mat.signsSum) / ((mat.size * mat.size - mat.size) / 2)
+              << ","
+              << mat.totalEnergy
               << "\n";
-    }
   }
+  // }
   pthread_exit(NULL);
-}
-std::string datetime()
-{
-  time_t rawtime;
-  struct tm *timeinfo;
-  char buffer[80];
-
-  time(&rawtime);
-  timeinfo = localtime(&rawtime);
-
-  strftime(buffer, 80, "%d-%m-%Y %H:%M:%S", timeinfo);
-  return string(buffer);
 }
 
 void simulate(int size,
@@ -113,29 +71,8 @@ void simulate(int size,
   int i;
   if (theta < 0)
   {
-    int thread_temp_step = 50 / NUM_THREADS;
-    for (i = 0; i < NUM_THREADS; i++)
-    {
-      td[i].thread_id = i;
-      td[i].ensemblesCount = ensemblesCount;
-      td[i].step = thread_temp_step;
-      td[i].start_theta = thread_temp_step * i;
-      td[i].alpha = alpha;
-      td[i].randomness = randomness;
-      td[i].size = size;
-      rc = pthread_create(&threads[i],
-                          NULL,
-                          doTheJob,
-                          (void *)&td[i]);
-
-      if (rc)
-      {
-        cout << "Error:unable to create thread," << rc << endl;
-        exit(-1);
-      }
-      // cout << pthread_join(threads[i], NULL) << "\n";
-    }
-    pthread_exit(NULL);
+    cout << "wrong input"
+         << "\n";
   }
   else
   {
@@ -144,7 +81,7 @@ void simulate(int size,
     {
       td[i].thread_id = i;
       td[i].ensemblesCount = ensembles;
-      td[i].start_theta = theta;
+      td[i].theta = theta;
       td[i].alpha = alpha;
       td[i].temperature = temperature;
       td[i].randomness = randomness;
@@ -159,8 +96,20 @@ void simulate(int size,
         cout << "Error:unable to create thread," << rc << endl;
         exit(-1);
       }
-      // cout << pthread_join(threads[i], NULL) << "\n";
     }
     pthread_exit(NULL);
   }
+}
+
+std::string datetime()
+{
+  time_t rawtime;
+  struct tm *timeinfo;
+  char buffer[80];
+
+  time(&rawtime);
+  timeinfo = localtime(&rawtime);
+
+  strftime(buffer, 80, "%d-%m-%Y %H:%M:%S", timeinfo);
+  return string(buffer);
 }
