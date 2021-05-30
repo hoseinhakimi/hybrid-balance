@@ -93,7 +93,7 @@ void Matrix::calculateTriadEnergy()
       this->twoStars += stars;
     };
   };
-  this->triadEnergy = eng / 3;
+  this->triadEnergy = eng / 3; // every triad is counted 3 times
 }
 
 void Matrix::calculateSquarEnergy()

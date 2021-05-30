@@ -41,7 +41,7 @@ void *doTheJobFixedTheta(void *args)
               << ","
               << data->randomness
               << ","
-              << float(mat.squareEnergy) / (mat.squarCount * 3)
+              << float(mat.squareEnergy) / (mat.squarCount * 3) // four nodes create 3 squares
               << ","
               << float(mat.openSquares) / (mat.squarCount * 12)
               << ","
@@ -76,7 +76,7 @@ void simulate(int size,
   }
   else
   {
-    int ensembles = ensemblesCount / NUM_THREADS;
+    int ensembles = ceil(ensemblesCount / NUM_THREADS);
     for (i = 0; i < NUM_THREADS; i++)
     {
       td[i].thread_id = i;

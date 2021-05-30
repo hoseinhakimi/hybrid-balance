@@ -139,6 +139,7 @@ void dynamics::oneSquareLink()
   this->sEng = 2 * linkSign * (this->sEng + (3 - 2 * mat->size) * linkSign);
   this->delta_o = -2 * linkSign * (mat->ssc - this->extraTerms);
 }
+
 void dynamics::randomTwinsGenerator()
 {
   this->randomTwins[0] = rand() % this->mat->size;
