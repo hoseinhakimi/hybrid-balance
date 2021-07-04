@@ -76,7 +76,7 @@ void simulate(int size,
   }
   else
   {
-    int ensembles = ceil(ensemblesCount / NUM_THREADS);
+    int ensembles = floor(ensemblesCount / NUM_THREADS);
     for (i = 0; i < NUM_THREADS; i++)
     {
       td[i].thread_id = i;

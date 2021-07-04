@@ -13,6 +13,25 @@ dynamics::dynamics(Matrix *mat, double temperature)
   this->nodes = new unsigned[mat->size];
   this->dum_1 = this->dum_2 = this->dum_3 = this->delta_o = this->extraTerms = 0;
 }
+void dynamics::mixedMonteCarloStepZero()
+{
+  float eng = 0;
+  this->randomTwinsGenerator();
+  this->oneSquareLink();
+  this->oneTraidLink();
+  eng = mat->theta * this->tEng + mat->alpha * this->sEng;
+
+  if (eng < 0)
+  {
+    mat->adjacency[this->randomTwins[0]][this->randomTwins[1]] *= -1;
+    mat->adjacency[this->randomTwins[1]][this->randomTwins[0]] *= -1;
+    mat->triadEnergy += this->tEng;
+    mat->squareEnergy += this->sEng;
+    mat->twoStars += this->tsc;
+    mat->openSquares += this->delta_o;
+    mat->signsSum += 2 * mat->adjacency[this->randomTwins[0]][this->randomTwins[1]];
+  }
+}
 void dynamics::mixedMonteCarloStep()
 {
   float eng = 0;
@@ -24,7 +43,8 @@ void dynamics::mixedMonteCarloStep()
   /*
     Boltzman Factor = exp(-dE/T)
     */
-  if (float(rand()) / RAND_MAX < exp(-eng / this->temperature))
+  double boltzman = this->temperature == 0 ? 0 : exp(-eng / this->temperature);
+  if (float(rand()) / RAND_MAX < boltzman)
   {
     mat->adjacency[this->randomTwins[0]][this->randomTwins[1]] *= -1;
     mat->adjacency[this->randomTwins[1]][this->randomTwins[0]] *= -1;
@@ -41,7 +61,8 @@ void dynamics::mixedDynamics()
   int montCarloSteps = pow(mat->size, 3);
   for (int i = 0; i < montCarloSteps; i++)
   {
-    this->mixedMonteCarloStep();
+    this->mixedMonteCarloStepZero();
+    // this->mixedMonteCarloStep();
     // this->randomTwinsGenerator();
     // this->oneSquareLink();
     // this->oneTraidLink();

@@ -25,6 +25,7 @@ public:
   dynamics(Matrix *, double);
   void randomTwinsGenerator();
   void mixedMonteCarloStep();
+  void mixedMonteCarloStepZero();
   void mixedDynamics();
   void triadDynamics();
   void squarDynamics();

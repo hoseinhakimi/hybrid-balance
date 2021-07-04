@@ -11,7 +11,7 @@ int main()
 
   cin >> size >> temperature >> temperature_steps >> alpha >> randomness >> ensemblesCount;
 
-  cout << temperature * temperature_steps << '\t' << alpha << '\t' << size << '\t' << randomness/2 << '\n';
+  cout << temperature * temperature_steps << '\t' << alpha << '\t' << size << '\t' << randomness / 2 << '\n';
 
-  simulate(size, randomness/2, alpha, 1, temperature * temperature_steps, ensemblesCount);
+  simulate(size, randomness / 2, alpha, 1, temperature * temperature_steps, ensemblesCount);
 }
