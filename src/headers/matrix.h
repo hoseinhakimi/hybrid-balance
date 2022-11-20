@@ -12,9 +12,12 @@ public:
   double participation;
   double alpha;
   double theta;
+  double omega;
   double erdosProbability;
   int triadCount;
   int squarCount;
+  int pentagonCount;
+  int pentagonEnergy;
 
   int signsSum = 0;
 
@@ -24,6 +27,7 @@ public:
 
   int triadEnergy;
   int squareEnergy;
+  int pentagonEnergy;
 
   float totalEnergy;
   int **adjacency;
@@ -36,10 +40,13 @@ public:
   void initializeAdjacency();
   void calculateTriadEnergy();
   void calculateSquarEnergy();
+  void calculatePentagonEnergy();
   void calculateTotalEnergy();
   void openSquaresChange(int *link);
   void oneSquareEnergy(unsigned *row);
+  void onePentagonEnergy(unsigned *row);
   int oneSquareEnergyPrime(unsigned *row);
+  int specificPentagonEnergyOneLinkFixed(unsigned *row);
 };
 
 #endif // HYBRIDDYNAMICS_HEADERS_MATRIX_H_

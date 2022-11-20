@@ -1,5 +1,5 @@
-//Author: Mohammad Hossein Hakimi Siboni
-//Center For Complex Networks and Social Data Science, Shahid Beheshti University, Physics Dpt.
+// Author: Mohammad Hossein Hakimi Siboni
+// Center For Complex Networks and Social Data Science, Shahid Beheshti University, Physics Dpt.
 
 #include <stdlib.h> /* srand, rand */
 #include <time.h>   /* time */
@@ -24,12 +24,14 @@ void Matrix::resetMatrix()
   this->erdosProbability == 1 ? this->initializeAdjacency() : this->erdosAdjacency();
   this->calculateTriadEnergy();
   this->calculateSquarEnergy();
+  this->calculatePentagonEnergy();
 }
 
 void Matrix::count()
 {
   this->triadCount = nChoosek(this->size, 3);
   this->squarCount = nChoosek(this->size, 4);
+  this->pentagonCount = nChoosek(this->size, 5) * 12;
 }
 
 void Matrix::makeMatrix()
@@ -103,10 +105,18 @@ void Matrix::calculateSquarEnergy()
   squares(4, this);
 }
 
+void Matrix::calculatePentagonEnergy()
+{
+  this->pentagonEnergy = 0;
+  pentagons(5, this);
+}
+
+
 void Matrix::calculateTotalEnergy()
 {
   this->totalEnergy = this->alpha * float(this->squareEnergy) / (this->squarCount * 3) +
-                      this->theta * float(this->triadEnergy) / (this->triadCount * 3);
+                      this->theta * float(this->triadEnergy) / (this->triadCount * 3) +
+                      this->omega * float(this->pentagonEnergy) / this->pentagonCount;
 }
 
 void Matrix::oneSquareEnergy(unsigned *row)
@@ -137,6 +147,22 @@ void Matrix::oneSquareEnergy(unsigned *row)
   this->openSquares += openSquare;
 }
 
+void Matrix::onePentagonEnergy(unsigned *row)
+{
+  int pentagonEnergy = 0;
+  unsigned idx[12][4] = {{1, 2, 3, 4}, {1, 2, 4, 3}, {1, 4, 2, 3}, {1, 3, 2, 4}, {1, 4, 3, 2}, {1, 3, 4, 2}, {2, 1, 3, 4}, {2, 1, 4, 3}, {2, 3, 1, 4}, {2, 4, 1, 3}, {3, 1, 2, 4}, {3, 2, 1, 4}};
+  for (unsigned i = 0; i < 4; i++)
+  {
+    pentagonEnergy -= this->adjacency[row[0]][row[idx[i][0]]] *
+                      this->adjacency[row[idx[i][0]]][row[idx[i][1]]] *
+                      this->adjacency[row[idx[i][1]]][row[idx[i][2]]] *
+                      this->adjacency[row[idx[i][2]]][row[idx[i][3]]] *
+                      this->adjacency[row[idx[i][3]]][row[0]];
+  }
+  this->pentagonEnergy += pentagonEnergy;
+}
+
+
 int Matrix::oneSquareEnergyPrime(unsigned *row)
 {
   int sqrEnergy = 0;
@@ -159,6 +185,20 @@ int Matrix::oneSquareEnergyPrime(unsigned *row)
   }
   this->ssc += openSquare;
   return sqrEnergy;
+}
+
+int Matrix::specificPentagonEnergyOneLinkFixed(unsigned *row)
+{
+  int pentagonEnergy = 0;
+  unsigned nodeIterations[6][3] = {{4, 2, 3}, {4, 3, 2}, {2, 4, 3}, {2, 3, 4}, {3, 4, 2}, {3, 2, 4}};
+  for (unsigned i = 0; i < 3; i++)
+  {
+    pentagonEnergy += this->adjacency[row[0]][row[nodeIterations[i][0]]] *
+                      this->adjacency[row[nodeIterations[i][0]]][row[nodeIterations[i][1]]] *
+                      this->adjacency[row[nodeIterations[i][1]]][row[nodeIterations[i][2]]] *
+                      this->adjacency[row[nodeIterations[i][2]]][row[1]];
+  }
+  return pentagonEnergy;
 }
 
 void Matrix::openSquaresChange(int *link)

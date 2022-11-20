@@ -46,3 +46,25 @@ void squares(unsigned r, Matrix *mat)
     mat->oneSquareEnergy(oneSquare);
   } while (std::next_permutation(v.begin(), v.end()));
 }
+
+void pentagons(unsigned r, Matrix *mat)
+{
+  unsigned onePentagon[5];
+  std::vector<bool> v(mat->size);
+  std::fill(v.end() - r, v.end(), true);
+  short column;
+  do
+  {
+    column = 0;
+    for (unsigned i = 0; i < mat->size; ++i)
+    {
+      if (v[i])
+      {
+        onePentagon[column] = i;
+        column++;
+      }
+    }
+    // mat->squareEnergy += mat->oneSquareEnergy(oneSquare);
+    mat->onePentagonEnergy(onePentagon);
+  } while (std::next_permutation(v.begin(), v.end()));
+}

@@ -17,8 +17,9 @@ public:
   int *row;
   int *column;
   int tsc, dum_1, dum_2, dum_3, extraTerms, delta_o;
-  float tEng, sEng;
+  float tEng, sEng, pEng;
   unsigned oneSquare[4];
+  unsigned onePentagon[5];
   unsigned smaller, bigger;
   unsigned *nodes;
 
@@ -31,6 +32,7 @@ public:
   void squarDynamics();
   void oneSquareLink();
   void oneTraidLink();
+  void onePentagonLink();
 };
 
 #endif // HYBRIDDYNAMICS_DYNAMICS_MATRIX_H_

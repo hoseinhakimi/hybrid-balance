@@ -1,5 +1,5 @@
-//Author: Mohammad Hossein Hakimi Siboni
-//Center For Complex Networks and Social Data Science, Shahid Beheshti University, Physics Dpt.
+// Author: Mohammad Hossein Hakimi Siboni
+// Center For Complex Networks and Social Data Science, Shahid Beheshti University, Physics Dpt.
 
 #include "dynamics.h"
 #include <iostream>
@@ -61,8 +61,8 @@ void dynamics::mixedDynamics()
   int montCarloSteps = pow(mat->size, 3);
   for (int i = 0; i < montCarloSteps; i++)
   {
-    this->mixedMonteCarloStepZero();
-    // this->mixedMonteCarloStep();
+    // this->mixedMonteCarloStepZero();
+    this->mixedMonteCarloStep();
     // this->randomTwinsGenerator();
     // this->oneSquareLink();
     // this->oneTraidLink();
@@ -161,10 +161,26 @@ void dynamics::oneSquareLink()
   this->delta_o = -2 * linkSign * (mat->ssc - this->extraTerms);
 }
 
+void dynamics::onePentagonLink()
+{
+  this->pEng = 0;
+  short linkSign = mat->adjacency[this->onePentagon[0]][this->onePentagon[1]];
+  for (int c = 0; c < mat->size; c++)
+  {
+    for (int j = 0; j < c; j++)
+    {
+      this->sEng += mat->specificPentagonEnergyOneLinkFixed(onePentagon);
+    }
+  }
+  this->pEng = - linkSign;
+}
+
 void dynamics::randomTwinsGenerator()
 {
   this->randomTwins[0] = rand() % this->mat->size;
   this->randomTwins[1] = (this->randomTwins[0] + (rand() % (this->mat->size - 1)) + 1) % this->mat->size;
   this->oneSquare[0] = this->randomTwins[0];
   this->oneSquare[1] = this->randomTwins[1];
+  this->onePentagon[0] = this->randomTwins[0];
+  this->onePentagon[1] = this->randomTwins[1];
 }
