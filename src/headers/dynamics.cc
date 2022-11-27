@@ -167,12 +167,18 @@ void dynamics::onePentagonLink()
   short linkSign = mat->adjacency[this->onePentagon[0]][this->onePentagon[1]];
   for (int c = 0; c < mat->size; c++)
   {
+    this->onePentagon[2] = c;
     for (int j = 0; j < c; j++)
     {
-      this->sEng += mat->specificPentagonEnergyOneLinkFixed(onePentagon);
+      this->onePentagon[3] = j;
+      for (int k = 0; k < j; k++)
+      {
+        this->onePentagon[4] = k;
+        this->sEng += mat->specificPentagonEnergyOneLinkFixed(onePentagon);
+      }
     }
   }
-  this->pEng = - linkSign;
+  this->pEng = -linkSign;
 }
 
 void dynamics::randomTwinsGenerator()
