@@ -3,9 +3,11 @@
 
 #include "dynamics.h"
 #include <iostream>
+#include <vector>
 #include <numeric> // std::inner_product
 #include <math.h>  /* exp pow */
-
+#include <algorithm>
+using namespace std;
 dynamics::dynamics(Matrix *mat, double temperature)
 {
   this->mat = mat;
@@ -38,7 +40,7 @@ void dynamics::mixedMonteCarloStep()
   this->randomTwinsGenerator();
   this->oneSquareLink();
   this->oneTraidLink();
-  eng = mat->theta * this->tEng + mat->alpha * this->sEng;
+  eng = mat->theta * this->tEng + mat->alpha * this->sEng + mat->omega * this->pEng;
 
   /*
     Boltzman Factor = exp(-dE/T)
@@ -50,6 +52,7 @@ void dynamics::mixedMonteCarloStep()
     mat->adjacency[this->randomTwins[1]][this->randomTwins[0]] *= -1;
     mat->triadEnergy += this->tEng;
     mat->squareEnergy += this->sEng;
+    mat->pentagonEnergy += this->pEng;
     mat->twoStars += this->tsc;
     mat->openSquares += this->delta_o;
     mat->signsSum += 2 * mat->adjacency[this->randomTwins[0]][this->randomTwins[1]];
@@ -157,6 +160,7 @@ void dynamics::oneSquareLink()
   }
   this->extraTerms = (this->dum_1 + this->dum_2) * 2 * linkSign +
                      2 * dum_3 + 2 * (mat->size - 1) - 3;
+  // 2 is for calculating the energy difference, 3 - 2 * mat->zie is for invalid loops squares in the loop.
   this->sEng = 2 * linkSign * (this->sEng + (3 - 2 * mat->size) * linkSign);
   this->delta_o = -2 * linkSign * (mat->ssc - this->extraTerms);
 }
@@ -165,20 +169,27 @@ void dynamics::onePentagonLink()
 {
   this->pEng = 0;
   short linkSign = mat->adjacency[this->onePentagon[0]][this->onePentagon[1]];
-  for (int c = 0; c < mat->size; c++)
+  int arr[mat->size];
+  iota(arr, arr + mat->size, 1);
+  vector<int> mainVect(arr, arr + mat->size);
+
+  mainVect.erase(remove(mainVect.begin(), mainVect.end(), this->onePentagon[0]), mainVect.end());
+  mainVect.erase(remove(mainVect.begin(), mainVect.end(), this->onePentagon[1]), mainVect.end());
+
+  for (int i = 0; i < mainVect.size(); i++)
   {
-    this->onePentagon[2] = c;
-    for (int j = 0; j < c; j++)
+    this->onePentagon[2] = i;
+    for (int j = 0; j < i; j++)
     {
       this->onePentagon[3] = j;
       for (int k = 0; k < j; k++)
       {
-        this->onePentagon[4] = k;
-        this->sEng += mat->specificPentagonEnergyOneLinkFixed(onePentagon);
+        this->onePentagon[3] = k;
       }
     }
   }
-  this->pEng = -linkSign;
+  // 2 is for calculating the energy difference on link change.
+  this->pEng = 2 * linkSign * this->pEng;
 }
 
 void dynamics::randomTwinsGenerator()
