@@ -7,12 +7,13 @@
 #include "matrix.h"
 #include "../mathematics/iter.cc"
 
-Matrix::Matrix(short size, double randomness, double alpha, double theta, double erdosProbability = 1)
+Matrix::Matrix(short size, double randomness,double omega, double alpha, double theta, double erdosProbability = 1)
 {
   this->size = size;
   this->randomness = randomness;
   this->alpha = alpha;
   this->theta = theta;
+  this->omega = omega;
   this->erdosProbability = erdosProbability;
   this->count();
   this->makeMatrix();
@@ -115,7 +116,7 @@ void Matrix::calculatePentagonEnergy()
 void Matrix::calculateTotalEnergy()
 {
   this->totalEnergy = this->alpha * float(this->squareEnergy) / (this->squarCount * 3) +
-                      this->theta * float(this->triadEnergy) / (this->triadCount * 3) +
+                      this->theta * float(this->triadEnergy) / this->triadCount +
                       this->omega * float(this->pentagonEnergy) / this->pentagonCount;
 }
 
@@ -151,7 +152,7 @@ void Matrix::onePentagonEnergy(unsigned *row)
 {
   int pentagonEnergy = 0;
   unsigned idx[12][4] = {{1, 2, 3, 4}, {1, 2, 4, 3}, {1, 4, 2, 3}, {1, 3, 2, 4}, {1, 4, 3, 2}, {1, 3, 4, 2}, {2, 1, 3, 4}, {2, 1, 4, 3}, {2, 3, 1, 4}, {2, 4, 1, 3}, {3, 1, 2, 4}, {3, 2, 1, 4}};
-  for (unsigned i = 0; i < 4; i++)
+  for (unsigned i = 0; i < 12; i++)
   {
     pentagonEnergy -= this->adjacency[row[0]][row[idx[i][0]]] *
                       this->adjacency[row[idx[i][0]]][row[idx[i][1]]] *
@@ -161,7 +162,6 @@ void Matrix::onePentagonEnergy(unsigned *row)
   }
   this->pentagonEnergy += pentagonEnergy;
 }
-
 
 int Matrix::oneSquareEnergyPrime(unsigned *row)
 {
@@ -185,6 +185,20 @@ int Matrix::oneSquareEnergyPrime(unsigned *row)
   }
   this->ssc += openSquare;
   return sqrEnergy;
+}
+
+int Matrix::onePentagonEnergyPrime(unsigned *row)
+{
+  int pentagonEnergy = 0;
+  unsigned idx[6][4] = {{1, 2, 3, 4}, {1, 2, 4, 3}, {1, 4, 2, 3}, {1, 3, 2, 4}, {1, 4, 3, 2}, {1, 3, 4, 2}};
+  for (unsigned i = 0; i < 6; i++)
+  {
+    pentagonEnergy += this->adjacency[row[idx[i][0]]][row[idx[i][1]]] *
+                      this->adjacency[row[idx[i][1]]][row[idx[i][2]]] *
+                      this->adjacency[row[idx[i][2]]][row[idx[i][3]]] *
+                      this->adjacency[row[idx[i][3]]][row[0]];
+  }
+  return pentagonEnergy;
 }
 
 int Matrix::specificPentagonEnergyOneLinkFixed(unsigned *row)

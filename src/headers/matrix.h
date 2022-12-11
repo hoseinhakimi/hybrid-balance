@@ -17,7 +17,6 @@ public:
   int triadCount;
   int squarCount;
   int pentagonCount;
-  int pentagonEnergy;
 
   int signsSum = 0;
 
@@ -32,7 +31,7 @@ public:
   float totalEnergy;
   int **adjacency;
 
-  Matrix(short size, double randomness, double alpha, double theta, double erdosProbability);
+  Matrix(short size, double randomness,double omega, double alpha, double theta, double erdosProbability);
   void count();
   void makeMatrix();
   void resetMatrix();
@@ -46,6 +45,7 @@ public:
   void oneSquareEnergy(unsigned *row);
   void onePentagonEnergy(unsigned *row);
   int oneSquareEnergyPrime(unsigned *row);
+  int onePentagonEnergyPrime(unsigned *row);
   int specificPentagonEnergyOneLinkFixed(unsigned *row);
 };
 

@@ -21,6 +21,7 @@ void dynamics::mixedMonteCarloStepZero()
   this->randomTwinsGenerator();
   this->oneSquareLink();
   this->oneTraidLink();
+  this->onePentagonLink();
   eng = mat->theta * this->tEng + mat->alpha * this->sEng;
 
   if (eng < 0)
@@ -40,7 +41,11 @@ void dynamics::mixedMonteCarloStep()
   this->randomTwinsGenerator();
   this->oneSquareLink();
   this->oneTraidLink();
+  this->onePentagonLink();
+  // std::cout << mat->pentagonEnergy << "\t" << this->pEng << "\n";
   eng = mat->theta * this->tEng + mat->alpha * this->sEng + mat->omega * this->pEng;
+
+  // eng = this->pEng;
 
   /*
     Boltzman Factor = exp(-dE/T)
@@ -145,14 +150,14 @@ void dynamics::oneSquareLink()
   mat->ssc = 0;
   this->dum_1 = this->dum_2 = this->dum_3 = this->delta_o = this->extraTerms = 0;
   short linkSign = mat->adjacency[this->oneSquare[0]][this->oneSquare[1]];
-  for (int c = 0; c < mat->size; c++)
+  for (int c = 0; c < mat->size - 1; c++)
   {
     this->dum_1 += mat->adjacency[this->oneSquare[0]][c];
     this->dum_2 += mat->adjacency[this->oneSquare[1]][c];
     this->dum_3 += mat->adjacency[this->oneSquare[0]][c] *
                    mat->adjacency[this->oneSquare[1]][c];
     this->oneSquare[2] = c;
-    for (int j = 0; j < c; j++)
+    for (int j = c + 1; j < mat->size; j++)
     {
       this->oneSquare[3] = j;
       this->sEng += mat->oneSquareEnergyPrime(oneSquare);
@@ -172,19 +177,20 @@ void dynamics::onePentagonLink()
   int arr[mat->size];
   iota(arr, arr + mat->size, 1);
   vector<int> mainVect(arr, arr + mat->size);
-
   mainVect.erase(remove(mainVect.begin(), mainVect.end(), this->onePentagon[0]), mainVect.end());
   mainVect.erase(remove(mainVect.begin(), mainVect.end(), this->onePentagon[1]), mainVect.end());
 
-  for (int i = 0; i < mainVect.size(); i++)
+  for (int i = 0; i < mainVect.size() - 2; i++)
   {
-    this->onePentagon[2] = i;
-    for (int j = 0; j < i; j++)
+    // cout << a[i] << "\n";
+    this->onePentagon[2] = mainVect[i] - 1;
+    for (int j = i + 1; j < mainVect.size() - 1; j++)
     {
-      this->onePentagon[3] = j;
-      for (int k = 0; k < j; k++)
+      this->onePentagon[3] = mainVect[j] - 1;
+      for (int k = j + 1; k < mainVect.size(); k++)
       {
-        this->onePentagon[3] = k;
+        this->onePentagon[4] = mainVect[k] - 1;
+        this->pEng += mat->onePentagonEnergyPrime(onePentagon);
       }
     }
   }

@@ -1,5 +1,5 @@
-//Author: Mohammad Hossein Hakimi Siboni
-//Center For Complex Networks and Social Data Science, Shahid Beheshti University, Physics Dpt.
+// Author: Mohammad Hossein Hakimi Siboni
+// Center For Complex Networks and Social Data Science, Shahid Beheshti University, Physics Dpt.
 
 #include "headers/matrix.cc"
 #include "headers/dynamics.cc"
@@ -10,13 +10,13 @@
 #include <ctime>
 
 using namespace std;
-#define NUM_THREADS 3
+#define NUM_THREADS 1
 
 ofstream outfile;
 struct thread_data
 {
   int thread_id, size, ensemblesCount;
-  float randomness, alpha, theta, temperature;
+  float randomness, omega, alpha, theta, temperature;
 };
 void *doTheJobFixedTheta(void *args)
 {
@@ -27,7 +27,7 @@ void *doTheJobFixedTheta(void *args)
   outfile.open(path + to_string(data->size) + '_' + to_string(data->thread_id) + ".csv", ios_base::app);
   // for (int ensemble = 0; ensemble < data->ensemblesCount; ensemble++)
   // {
-  Matrix mat(data->size, data->randomness, data->alpha, data->theta);
+  Matrix mat(data->size, data->randomness, data->omega, data->alpha, data->theta);
   mat.calculateTotalEnergy();
   dynamics dyn(&mat, data->temperature);
   dyn.mixedDynamics();
@@ -51,7 +51,7 @@ void *doTheJobFixedTheta(void *args)
               << ","
               << float(mat.signsSum) / ((mat.size * mat.size - mat.size) / 2)
               << ","
-              << mat.totalEnergy
+              << float(mat.pentagonEnergy) / mat.pentagonCount
               << "\n";
   }
   // }
@@ -60,6 +60,7 @@ void *doTheJobFixedTheta(void *args)
 
 void simulate(int size,
               float randomness,
+              float omega,
               float alpha,
               float theta,
               float temperature,
