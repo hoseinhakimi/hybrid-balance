@@ -10,7 +10,7 @@
 #include <ctime>
 
 using namespace std;
-#define NUM_THREADS 1
+#define NUM_THREADS 3
 
 ofstream outfile;
 struct thread_data

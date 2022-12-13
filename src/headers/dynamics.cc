@@ -66,7 +66,7 @@ void dynamics::mixedMonteCarloStep()
 void dynamics::mixedDynamics()
 {
   float eng;
-  int montCarloSteps = pow(mat->size, 3);
+  int montCarloSteps = pow(mat->size, 4);
   for (int i = 0; i < montCarloSteps; i++)
   {
     // this->mixedMonteCarloStepZero();
@@ -169,16 +169,16 @@ void dynamics::oneSquareLink()
   this->sEng = 2 * linkSign * (this->sEng + (3 - 2 * mat->size) * linkSign);
   this->delta_o = -2 * linkSign * (mat->ssc - this->extraTerms);
 }
-
-void dynamics::onePentagonLink()
+// THIS ONE HAS PROBLEM
+void dynamics::onePentagonLink() 
 {
   this->pEng = 0;
   short linkSign = mat->adjacency[this->onePentagon[0]][this->onePentagon[1]];
   int arr[mat->size];
   iota(arr, arr + mat->size, 1);
   vector<int> mainVect(arr, arr + mat->size);
-  mainVect.erase(remove(mainVect.begin(), mainVect.end(), this->onePentagon[0]), mainVect.end());
-  mainVect.erase(remove(mainVect.begin(), mainVect.end(), this->onePentagon[1]), mainVect.end());
+  mainVect.erase(remove(mainVect.begin(), mainVect.end(), this->onePentagon[0]+1), mainVect.end());
+  mainVect.erase(remove(mainVect.begin(), mainVect.end(), this->onePentagon[1]+1), mainVect.end());
 
   for (int i = 0; i < mainVect.size() - 2; i++)
   {
