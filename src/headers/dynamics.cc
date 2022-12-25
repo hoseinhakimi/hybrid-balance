@@ -42,7 +42,6 @@ void dynamics::mixedMonteCarloStep()
   this->oneSquareLink();
   this->oneTraidLink();
   this->onePentagonLink();
-  // std::cout << mat->pentagonEnergy << "\t" << this->pEng << "\n";
   eng = mat->theta * this->tEng + mat->alpha * this->sEng + mat->omega * this->pEng;
 
   // eng = this->pEng;
@@ -66,7 +65,7 @@ void dynamics::mixedMonteCarloStep()
 void dynamics::mixedDynamics()
 {
   float eng;
-  int montCarloSteps = pow(mat->size, 4);
+  int montCarloSteps = pow(mat->size, 3);
   for (int i = 0; i < montCarloSteps; i++)
   {
     // this->mixedMonteCarloStepZero();

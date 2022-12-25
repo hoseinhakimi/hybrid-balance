@@ -3,12 +3,19 @@
 
 #include <stdlib.h> /* srand, rand */
 #include <time.h>   /* time */
-#include <numeric>  /* std::inner_product */
+#include <chrono>
+#include <thread>
+#include <numeric> /* std::inner_product */
 #include "matrix.h"
 #include "../mathematics/iter.cc"
 
-Matrix::Matrix(short size, double randomness,double omega, double alpha, double theta, double erdosProbability = 1)
+using namespace std::this_thread;     // sleep_for, sleep_until
+using namespace std::chrono_literals; // ns, us, ms, s, h, etc.
+using std::chrono::system_clock;
+
+Matrix::Matrix(short size, double randomness, double omega, double alpha, double theta, double erdosProbability = 1, short threadId = 0)
 {
+  this->threadId = threadId;
   this->size = size;
   this->randomness = randomness;
   this->alpha = alpha;
@@ -48,7 +55,7 @@ void Matrix::makeMatrix()
 void Matrix::erdosAdjacency()
 {
   this->signsSum = 0;
-  srand(time(NULL));
+  srand(time(0));
   for (short i = 0; i < this->size; i++)
   {
     for (short j = i + 1; j < this->size; j++)
@@ -67,7 +74,7 @@ void Matrix::erdosAdjacency()
 void Matrix::initializeAdjacency()
 {
   this->signsSum = 0;
-  srand(time(NULL));
+  srand(this->threadId);
   for (short i = 0; i < this->size; i++)
   {
     for (short j = i + 1; j < this->size; j++)
@@ -111,7 +118,6 @@ void Matrix::calculatePentagonEnergy()
   this->pentagonEnergy = 0;
   pentagons(5, this);
 }
-
 
 void Matrix::calculateTotalEnergy()
 {

@@ -10,7 +10,7 @@
 #include <ctime>
 
 using namespace std;
-#define NUM_THREADS 3
+#define NUM_THREADS 6
 
 ofstream outfile;
 struct thread_data
@@ -27,7 +27,7 @@ void *doTheJobFixedTheta(void *args)
   outfile.open(path + to_string(data->size) + '_' + to_string(data->thread_id) + ".csv", ios_base::app);
   // for (int ensemble = 0; ensemble < data->ensemblesCount; ensemble++)
   // {
-  Matrix mat(data->size, data->randomness, data->omega, data->alpha, data->theta);
+  Matrix mat(data->size, data->randomness, data->omega, data->alpha, data->theta,1, data->thread_id);
   mat.calculateTotalEnergy();
   dynamics dyn(&mat, data->temperature);
   dyn.mixedDynamics();
@@ -84,6 +84,7 @@ void simulate(int size,
       td[i].ensemblesCount = ensembles;
       td[i].theta = theta;
       td[i].alpha = alpha;
+      td[i].omega = omega;
       td[i].temperature = temperature;
       td[i].randomness = randomness;
       td[i].size = size;

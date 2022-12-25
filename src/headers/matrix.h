@@ -7,6 +7,7 @@
 class Matrix
 {
 public:
+  short threadId;
   short size;
   double randomness;
   double participation;
@@ -31,7 +32,7 @@ public:
   float totalEnergy;
   int **adjacency;
 
-  Matrix(short size, double randomness,double omega, double alpha, double theta, double erdosProbability);
+  Matrix(short size, double randomness,double omega, double alpha, double theta, double erdosProbability,short threadId);
   void count();
   void makeMatrix();
   void resetMatrix();
