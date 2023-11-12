@@ -61,8 +61,8 @@ void dynamics::mixedDynamics()
   int montCarloSteps = pow(mat->size, 3);
   for (int i = 0; i < montCarloSteps; i++)
   {
-    this->mixedMonteCarloStepZero();
-    // this->mixedMonteCarloStep();
+    // this->mixedMonteCarloStepZero();
+    this->mixedMonteCarloStep();
     // this->randomTwinsGenerator();
     // this->oneSquareLink();
     // this->oneTraidLink();
