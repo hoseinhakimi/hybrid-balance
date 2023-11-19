@@ -110,13 +110,13 @@ void Matrix::calculateSquarEnergy()
 {
   this->squareEnergy = 0;
   this->openSquares = 0;
-  squares(4, this);
+  // squares(4, this);
 }
 
 void Matrix::calculatePentagonEnergy()
 {
   this->pentagonEnergy = 0;
-  pentagons(5, this);
+  // pentagons(5, this);
 }
 
 void Matrix::calculateTotalEnergy()
